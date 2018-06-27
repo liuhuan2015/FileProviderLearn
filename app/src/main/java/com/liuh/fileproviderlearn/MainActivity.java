@@ -93,6 +93,10 @@ public class MainActivity extends AppCompatActivity {
 
             String filename = new SimpleDateFormat("yyyyMMdd-HHmmss", Locale.CHINA)
                     .format(new Date()) + ".png";
+            Log.e("------", "Environment.getExternalStorageDirectory() : " + Environment.getExternalStorageDirectory());
+            Log.e("------", "this.getFilesDir().toString() : " + this.getFilesDir().toString());
+            Log.e("------", "this.getCacheDir().toString() : " + this.getCacheDir().toString());
+
             File file = new File(Environment.getExternalStorageDirectory(), filename);
             mCurrentPhotoPath = file.getAbsolutePath();
 
@@ -103,7 +107,14 @@ public class MainActivity extends AppCompatActivity {
             //takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
             //startActivityForResult(takePictureIntent, REQUEST_CODE_TAKE_PHOTO);
 
-            Uri fileUri = FileProvider.getUriForFile(this, "com.liuh.fileproviderlearn.fileprovider", file);
+            //为了对旧版本进行兼容
+            Uri fileUri = null;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                fileUri = FileProvider.getUriForFile(this, "com.liuh.fileproviderlearn.fileprovider", file);
+            } else {
+                fileUri = Uri.fromFile(file);
+            }
+
             Log.e("------", fileUri.toString());
             takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri);
             startActivityForResult(takePictureIntent, REQUEST_CODE_TAKE_PHOTO);

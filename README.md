@@ -1,5 +1,6 @@
 # FileProviderLearn
-Android 7.0行为变更：FileProvider的使用
+【学习笔记】Android 7.0行为变更：FileProvider的使用
+>来源为文章[Android 7.0 行为变更 通过FileProvider在应用间共享文件吧](https://blog.csdn.net/lmj623565791/article/details/72859156)<br>
 >在官方7.0的以上的系统中，尝试传递 file://URI可能会触发FileUriExposedException
 #### 一 . 拍照案例
 当我们使用手机拍照并希望获取拍照后的高清图片时，我们会通过Intent传递一个File的Uri给相机应用。下面的写法是适配了Android 7.0及更高版本的，如果没有适配，在Android7.0及更高版本上运行会报错(android.os.FileUriExposedException)：<br>
@@ -64,12 +65,67 @@ https://developer.android.com/about/versions/nougat/android-7.0-changes.html#acc
 ```
 
 对于xml/file_paths文件的解释：<br>
-<root-path/> 代表设备的根目录new File("/");
-<files-path/> 代表context.getFilesDir()
-<cache-path/> 代表context.getCacheDir()
-<external-path/> 代表Environment.getExternalStorageDirectory()
-<external-files-path>代表context.getExternalFilesDirs()
-<external-cache-path>代表getExternalCacheDirs()
+* <root-path/> 代表设备的根目录new File("/");
+* <files-path/> 代表context.getFilesDir()
+* <cache-path/> 代表context.getCacheDir()
+* <external-path/> 代表Environment.getExternalStorageDirectory()
+* <external-files-path>代表context.getExternalFilesDirs()
+* <external-cache-path>代表getExternalCacheDirs()
+
+path即为代表目录下的子目录，比如：
+``` xml
+<external-path
+        name="external"
+        path="pics" />
+```
+代表的目录即为：Environment.getExternalStorageDirectory()/pics，其他同理
+
+#### 二 . 使用FileProvider兼容安装apk
+在Android7.0之前，我们编写安装apk的时候，一般是这样：<br>
+```java
+public void installApk(View view) {
+    File file = new File(Environment.getExternalStorageDirectory(), "testandroid7-debug.apk");
+
+    Intent intent = new Intent(Intent.ACTION_VIEW);
+    intent.setDataAndType(Uri.fromFile(file),
+            "application/vnd.android.package-archive");
+    startActivity(intent);
+}
+```
+这种写法到了Android7.0及更高版本上也是会报错的：android.os.FileUriExposedException.<br>
+最终写法：<br>
+```java
+    public void installApk() {
+        File file = new File(Environment.getExternalStorageDirectory(), "Nfc.apk");
+        Log.e("-------------", "file.exists() : " + file.exists());
+
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        Uri fileUri = null;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            fileUri = FileProvider.getUriForFile(this, "com.liuh.fileproviderlearn.fileprovider", file);
+        } else {
+            fileUri = Uri.fromFile(file);
+        }
+
+        intent.setDataAndType(fileUri,
+                "application/vnd.android.package-archive");
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+        startActivity(intent);
+    }
+```
+
+#### 三 . 总结
+使用content://替代file://，主要需要FileProvider的支持，而因为FileProvider是ContentProvider的子类，所以需要在AndroidManifest.xml中注册；而又因为需要对真实的filepath进行映射，所以需要编写一个xml文档，用于描述可使用的文件夹目录，以及通过name去映射该文件夹目录。<br>
+
+对于权限，有两种方式：
+* 方式一为Intent.addFlags，该方式主要用于针对intent.setData，setDataAndType以及setClipData相关方式传递uri的。
+* 方式二为grantUriPermission来进行授权
+
+相比来说方式二较为麻烦，因为需要指定目标应用包名，很多时候并不清楚，所以需要通过PackageManager进行查找到所有匹配的应用，全部进行授权。不过更为稳妥~<br>
+方式一较为简单，对于intent.setData，setDataAndType正常使用即可，但是对于setClipData，由于5.0前后Intent#migrateExtraStreamToClipData，代码发生变化，需要注意~<br>
+
+#### 四 . 作者提供了一种快速适配的方案，即编写一个library类型的module,在项目中需要用到FileProvider的适配时，进行引用使用。这个就不写了，见原文吧。
+
 
 
 

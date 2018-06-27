@@ -152,8 +152,16 @@ public class MainActivity extends AppCompatActivity {
         Log.e("-------------", "file.exists() : " + file.exists());
 
         Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setDataAndType(Uri.fromFile(file),
+        Uri fileUri = null;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            fileUri = FileProvider.getUriForFile(this, "com.liuh.fileproviderlearn.fileprovider", file);
+        } else {
+            fileUri = Uri.fromFile(file);
+        }
+
+        intent.setDataAndType(fileUri,
                 "application/vnd.android.package-archive");
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
         startActivity(intent);
     }
 

@@ -13,6 +13,12 @@
         android:layout_height="wrap_content"
         android:text="拍照" />
 
+    <Button
+        android:id="@+id/btn_install_apk"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="安装一个apk" />
+
     <ImageView
         android:id="@+id/iv_pic"
         android:layout_width="match_parent"

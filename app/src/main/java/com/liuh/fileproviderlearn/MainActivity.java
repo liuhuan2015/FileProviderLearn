@@ -77,11 +77,16 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @OnClick({R.id.btn_take_pic})
+    @OnClick({R.id.btn_take_pic, R.id.btn_install_apk})
     void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.btn_take_pic:
+                //拍照并获取一张图片
                 takePhotoNoCompress();
+                break;
+            case R.id.btn_install_apk:
+                //安装一个apk文件
+                installApk();
                 break;
         }
     }
@@ -141,4 +146,15 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
+    public void installApk() {
+        File file = new File(Environment.getExternalStorageDirectory(), "Nfc.apk");
+        Log.e("-------------", "file.exists() : " + file.exists());
+
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setDataAndType(Uri.fromFile(file),
+                "application/vnd.android.package-archive");
+        startActivity(intent);
+    }
+
 }

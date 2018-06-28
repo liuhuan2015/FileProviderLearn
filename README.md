@@ -65,12 +65,12 @@ https://developer.android.com/about/versions/nougat/android-7.0-changes.html#acc
 ```
 
 对于xml/file_paths文件的解释：<br>
-* <root-path/> 代表设备的根目录new File("/");
-* <files-path/> 代表context.getFilesDir()
-* <cache-path/> 代表context.getCacheDir()
-* <external-path/> 代表Environment.getExternalStorageDirectory()
-* <external-files-path>代表context.getExternalFilesDirs()
-* <external-cache-path>代表getExternalCacheDirs()
+* \<root-path\/\>代表设备的根目录new File("/");
+* \<files-path\/\>代表context.getFilesDir()
+* \<cache-path\/\>代表context.getCacheDir()
+* \<external-path\/\>代表Environment.getExternalStorageDirectory()
+* \<external-files-path\/\>代表context.getExternalFilesDirs()
+* \<external-cache-path\/\>代表getExternalCacheDirs()
 
 path即为代表目录下的子目录，比如：
 ``` xml

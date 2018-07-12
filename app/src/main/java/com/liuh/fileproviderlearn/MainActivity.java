@@ -3,6 +3,7 @@ package com.liuh.fileproviderlearn;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
@@ -43,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_CODE_PERMISSION_CAMERA = 0x110;
     private static final int REQUEST_CODE_TAKE_PHOTO = 0x111;
+    private static final int REQUEST_CODE_PICK_PHOTO = 0X112;
 
     private String mCurrentPhotoPath;
 
@@ -77,12 +79,17 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @OnClick({R.id.btn_take_pic, R.id.btn_install_apk})
+    @OnClick({R.id.btn_take_pic, R.id.btn_choose_pic, R.id.btn_install_apk})
     void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.btn_take_pic:
                 //拍照并获取一张图片
                 takePhotoNoCompress();
+                break;
+            case R.id.btn_choose_pic:
+                Intent intent = new Intent(Intent.ACTION_PICK);
+                intent.setType("image/*");
+                startActivityForResult(intent, REQUEST_CODE_PICK_PHOTO);
                 break;
             case R.id.btn_install_apk:
                 //安装一个apk文件
@@ -131,7 +138,39 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_TAKE_PHOTO && resultCode == RESULT_OK) {
             ivPic.setImageBitmap(BitmapFactory.decodeFile(mCurrentPhotoPath));
+        } else if (requestCode == REQUEST_CODE_PICK_PHOTO && resultCode == RESULT_OK) {
+            Uri uri = data.getData();
+
+            String filePath = getRealPathFromUri(uri);
+
+            Log.e("-------", "filePath: " + filePath);
         }
+    }
+
+    private String getRealPathFromUri(Uri contentUri) {
+        String result = null;
+        Cursor cursor = null;
+
+        Log.e("-------", " contentUri.toString(): " + contentUri.toString());
+
+        try {
+            cursor = getContentResolver().query(contentUri, null, null, null, null);
+
+            if (cursor == null) {
+                result = contentUri.getPath();
+            } else {
+                cursor.moveToFirst();
+                int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+                result = cursor.getString(idx);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+        return result;
     }
 
     @Override

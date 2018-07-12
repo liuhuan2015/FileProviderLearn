@@ -11,7 +11,13 @@
         android:id="@+id/btn_take_pic"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="拍照" />
+        android:text="拍照并获取拍照后的图片" />
+
+    <Button
+        android:id="@+id/btn_choose_pic"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="选取一张手机里面的图片" />
 
     <Button
         android:id="@+id/btn_install_apk"
